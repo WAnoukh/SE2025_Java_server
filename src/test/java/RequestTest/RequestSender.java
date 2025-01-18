@@ -9,7 +9,7 @@ import java.net.URLConnection;
 
 public class RequestSender {
     public static void main(String[] args) throws Exception {
-        URL url = new URL("https://deaf-janela-anoukh-eb7ffe47.koyeb.app/");
+        URL url = new URL("http://localhost:8888/test?userID=someID&userRole=Volunteer");
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setRequestMethod("GET");
         con.connect();
