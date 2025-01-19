@@ -1,5 +1,6 @@
 package Javabackend;
 
+import Javabackend.GovernmentVolunteer.Volunteer.VolunteerController;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +21,7 @@ public class CommandDispatcher {
     private CommandDispatcher() {
     }
 
-    public static void dispatch(String command) throws CommandException {
+    public static JSONObject dispatch(String command) throws CommandException {
         JSONObject jsonCommand;
         try {
             jsonCommand = new JSONObject(command);
@@ -28,7 +29,7 @@ public class CommandDispatcher {
             throw new CommandException("Invalid JSON");
         }
         if(!jsonCommand.has("command")){
-            throw new CommandException("No command found");
+            throw new CommandException("No command found in JSON");
         }
         String commandName = jsonCommand.getString("command");
         List<String> args = new ArrayList<>();
@@ -37,10 +38,10 @@ public class CommandDispatcher {
             try {
                 jsonArgs = jsonCommand.getJSONArray("args");
             }catch (JSONException e){
-                throw new CommandException("Invalid args");
+                throw new CommandException("Invalid args, args should be an array of strings");
             }
             for (int i = 0; i < jsonArgs.length(); i++){
-                args.add(jsonArgs.getString(i));
+                args.add(jsonArgs.get(i).toString());
             }
         }
 
@@ -55,18 +56,35 @@ public class CommandDispatcher {
             java.lang.reflect.Method[] methods = CommandDispatcher.class.getDeclaredMethods();
             for (Method method : methods){
                 if(Objects.equals(method.getName(), commandName)){
-                    throw new CommandException("Wrong arguments");
+                    throw new CommandException("No matching method found for command with " + args.size() + " arguments with the name " + commandName);
                 }
             }
-            throw new CommandException("Command not found");
+            throw new CommandException("No matching method found for command with the name " + commandName);
         }
         Object result;
         try {
             Object[] argsArray = new String[args.size()];
             argsArray = args.toArray(argsArray);
             result = function.invoke(null, argsArray);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new CommandException("Error executing command");
+            if(result instanceof JSONObject) {
+                return (JSONObject) result;
+            }else {
+                throw new CommandException("Invalid return type for command : " + commandName);
+            }
+        } catch (IllegalAccessException e) {
+            throw new CommandException("Error executing command " + commandName + " : " + e.getMessage());
+        } catch (InvocationTargetException e) {
+            throw new CommandException("Error executing command " + commandName + " : " + e.getTargetException().getMessage());
+        }
+    }
+
+    public static JSONObject createVolunteerFromUser(String lastName, String firstName, String validated, String street, String postalCode, String city, String country, String userId) {
+        VolunteerController volunteerController = VolunteerController.getInstance();
+        try {
+            volunteerController.createVolunteerFromUser(lastName, firstName, Boolean.parseBoolean(validated), street, postalCode, city, country, userId);
+            return new JSONObject().put("status", "success").put("message", "Volunteer created");
+        } catch (JavaBackendException e) {
+            return new JSONObject().put("status", "error").put("message", e.getMessage());
         }
     }
 }
