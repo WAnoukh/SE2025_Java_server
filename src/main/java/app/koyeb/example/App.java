@@ -12,6 +12,8 @@ import Javabackend.CommandDispatcher;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class App {
 
@@ -30,9 +32,20 @@ public class App {
     con.setRequestProperty("Content-Type", "application/json");
     con.setRequestProperty("Accept", "application/json");
     con.setDoOutput(true);
-    String jsonInputString = "{ \"email\" : \"iletisim@bdemir.net\", \"password\": \"123\"}";
+    con.setDoInput(true);
+    JSONObject jsonInput = new JSONObject().put("command", "createVolunteerFromUser")
+        .put("args", new JSONArray()
+                .put("Wach")
+                .put("Anouk")
+                .put(true)
+                .put("Rue de la Tour 1")
+                .put("1000")
+                .put("Lausanne")
+                .put("Switzerland")
+                .put("678c9729856283f299c918cf"));
     try(OutputStream os = con.getOutputStream()) {
-      byte[] input = jsonInputString.getBytes("utf-8");
+
+      byte[] input = jsonInput.toString().getBytes("utf-8");
       os.write(input, 0, input.length);
     }
 
@@ -50,16 +63,16 @@ public class App {
   static class MyHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange t) throws IOException {
-      String response = null;
+      JSONObject response = null;
 
       if (t.getRequestURI().getQuery() == null) {
-        response = "{\"success\": \"false\", \"message\":\"No query parameters found\"}";
+        response = new JSONObject().put("success", "false").put("message", "No query parameters found");
       }
 
       Map<String, String> args = splitQuery(t.getRequestURI().getQuery());
 
       if(!args.containsKey("userID") || !args.containsKey("userRole")) {
-        response = "{\"success\": \"false\", \"message\":\"Missing required parameters\"}";
+        response = new JSONObject().put("success", "false").put("message", "Missing required parameters");
       }
 
       if(response == null) {
@@ -73,16 +86,16 @@ public class App {
           }
           inputLine = builder.toString();
           CommandDispatcher.dispatch(inputLine);
-          response = "{\"success\": \"true\", \"data\":" + inputLine + "}";
+          response = new JSONObject().put("success", "true").put("message", "Command dispatched successfully");
         } catch (Exception e) {
-          response = "{\"success\": \"false\", \"message\":\"" + e.getMessage() + "\"}";
+          response = new JSONObject().put("success", "false").put("message", e.getMessage());
         }
       }
 
 
-      t.sendResponseHeaders(200, response.length());
+      t.sendResponseHeaders(200, response.toString().length());
       OutputStream os = t.getResponseBody();
-      os.write(response.getBytes());
+      os.write(response.toString().getBytes());
       os.close();
     }
   }
