@@ -22,29 +22,6 @@ public class App {
     server.setExecutor(Executors.newCachedThreadPool());
     System.out.println("Listening on port " + port + ".");
     server.start();
-
-    URL url = new URL("http://localhost:8888/test?userID=someID&userRole=Volunteer");
-    HttpURLConnection con = (HttpURLConnection)url.openConnection();
-    con.setRequestMethod("GET");
-    //con.connect();
-    con.setRequestProperty("Content-Type", "application/json");
-    con.setRequestProperty("Accept", "application/json");
-    con.setDoOutput(true);
-    String jsonInputString = "{ \"email\" : \"iletisim@bdemir.net\", \"password\": \"123\"}";
-    try(OutputStream os = con.getOutputStream()) {
-      byte[] input = jsonInputString.getBytes("utf-8");
-      os.write(input, 0, input.length);
-    }
-
-    //read the response
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-    String inputLine;
-    StringBuffer content = new StringBuffer();
-    while ((inputLine = in.readLine()) != null) {
-      content.append(inputLine);
-    }
-    in.close();
-    System.out.println(content);
   }
 
   static class MyHandler implements HttpHandler {
