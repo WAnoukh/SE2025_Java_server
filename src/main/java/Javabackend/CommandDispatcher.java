@@ -32,7 +32,7 @@ public class CommandDispatcher {
             throw new CommandException("No command found in JSON");
         }
         String commandName = jsonCommand.getString("command");
-        List<String> args = new ArrayList<>();
+        List<Object> args = new ArrayList<>();
         if(jsonCommand.has("args")){
             JSONArray jsonArgs;
             try {
@@ -41,7 +41,7 @@ public class CommandDispatcher {
                 throw new CommandException("Invalid args, args should be an array of strings");
             }
             for (int i = 0; i < jsonArgs.length(); i++){
-                args.add(jsonArgs.get(i).toString());
+                args.add(jsonArgs.get(i));
             }
         }
 
@@ -49,7 +49,7 @@ public class CommandDispatcher {
         try {
             Class[] cArg = new Class[args.size()];
             for (int i = 0; i < args.size(); i++){
-                cArg[i] = String.class;
+                cArg[i] = args.get(i).getClass();
             }
             function  = CommandDispatcher.class.getDeclaredMethod(commandName, cArg);
         } catch (NoSuchMethodException e) {
@@ -63,7 +63,7 @@ public class CommandDispatcher {
         }
         Object result;
         try {
-            Object[] argsArray = new String[args.size()];
+            Object[] argsArray = new Object[args.size()];
             argsArray = args.toArray(argsArray);
             result = function.invoke(null, argsArray);
             if(result instanceof JSONObject) {
@@ -78,10 +78,10 @@ public class CommandDispatcher {
         }
     }
 
-    public static JSONObject createVolunteerFromUser(String lastName, String firstName, String validated, String street, String postalCode, String city, String country, String userId) {
+    public static JSONObject createVolunteerFromUser(String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) {
         VolunteerController volunteerController = VolunteerController.getInstance();
         try {
-            volunteerController.createVolunteerFromUser(lastName, firstName, Boolean.parseBoolean(validated), street, postalCode, city, country, userId);
+            volunteerController.createVolunteerFromUser(lastName, firstName, validated, street, postalCode, city, country, userId);
             return new JSONObject().put("status", "success").put("message", "Volunteer created");
         } catch (JavaBackendException e) {
             return new JSONObject().put("status", "error").put("message", e.getMessage());
