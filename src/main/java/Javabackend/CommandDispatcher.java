@@ -92,4 +92,14 @@ public class CommandDispatcher {
             return new JSONObject().put("status", "error").put("message", e.getMessage());
         }
     }
+
+    public static JSONObject updateVolunteer(UserInfo userInfo, String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) {
+        VolunteerController volunteerController = VolunteerController.getInstance();
+        try {
+            volunteerController.updateVolunteer(lastName, firstName, validated, street, postalCode, city, country, userId);
+            return new JSONObject().put("status", "success").put("message", "Volunteer updated");
+        } catch (JavaBackendException e) {
+            return new JSONObject().put("status", "error").put("message", e.getMessage());
+        }
+    }
 }

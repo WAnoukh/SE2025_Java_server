@@ -22,7 +22,7 @@ public class RequestSender {
         con.setRequestProperty("Accept", "application/json");
         con.setDoOutput(true);
         con.setDoInput(true);
-        JSONObject jsonInput = new JSONObject().put("command", "createVolunteerFromUser")
+        JSONObject jsonInput = new JSONObject().put("command", "updateVolunteer")
                 .put("args", new JSONArray()
                         .put("Wach")
                         .put("Anouk")

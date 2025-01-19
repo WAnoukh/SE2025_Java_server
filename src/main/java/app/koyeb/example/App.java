@@ -48,11 +48,10 @@ public class App {
             builder.append(line);
           }
           inputLine = builder.toString();
-            CommandDispatcher.UserInfo userInfo = new CommandDispatcher.UserInfo();
-            userInfo.userID = args.get("userID");
-            userInfo.userRole = args.get("userRole");
-          CommandDispatcher.dispatch(inputLine, userInfo);
-          response = new JSONObject().put("success", "true").put("message", "Command dispatched successfully");
+          CommandDispatcher.UserInfo userInfo = new CommandDispatcher.UserInfo();
+          userInfo.userID = args.get("userID");
+          userInfo.userRole = args.get("userRole");
+          response = CommandDispatcher.dispatch(inputLine, userInfo);
         } catch (Exception e) {
           response = new JSONObject().put("success", "false").put("message", e.getMessage());
         }
