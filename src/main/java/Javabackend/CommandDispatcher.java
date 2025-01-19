@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class CommandDispatcher {
+    public static class UserInfo {
+        public String userID;
+        public String userRole;
+    }
     public static class CommandException extends Exception {
         public CommandException(String message) {
             super(message);
@@ -21,7 +25,7 @@ public class CommandDispatcher {
     private CommandDispatcher() {
     }
 
-    public static JSONObject dispatch(String command) throws CommandException {
+    public static JSONObject dispatch(String command, UserInfo userInfo) throws CommandException {
         JSONObject jsonCommand;
         try {
             jsonCommand = new JSONObject(command);
@@ -33,6 +37,7 @@ public class CommandDispatcher {
         }
         String commandName = jsonCommand.getString("command");
         List<Object> args = new ArrayList<>();
+        args.add(userInfo);
         if(jsonCommand.has("args")){
             JSONArray jsonArgs;
             try {
@@ -78,7 +83,7 @@ public class CommandDispatcher {
         }
     }
 
-    public static JSONObject createVolunteerFromUser(String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) {
+    public static JSONObject createVolunteerFromUser(UserInfo userInfo,String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) {
         VolunteerController volunteerController = VolunteerController.getInstance();
         try {
             volunteerController.createVolunteerFromUser(lastName, firstName, validated, street, postalCode, city, country, userId);
