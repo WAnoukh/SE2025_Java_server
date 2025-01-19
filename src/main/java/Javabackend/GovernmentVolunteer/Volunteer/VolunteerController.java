@@ -6,6 +6,8 @@ import Javabackend.JavaBackendException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,6 @@ public class VolunteerController {
         List<Volunteer> volunteers = new ArrayList<>();
         try (MongoCursor<Document> cursor = volunteerCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                //System.out.println(cursor.next().toJson());
                 try {
                     volunteers.add(new Volunteer(cursor.next()));
                 } catch (Exception e) {
@@ -62,14 +63,7 @@ public class VolunteerController {
 
     public void addVolunteer(Volunteer volunteer) throws JavaBackendException {
         DatabaseManager dbManager = DatabaseManager.getInstance();;
-        Document volunteerDocument = new Document("_id", volunteer.getUserId())
-                .append("lastName", volunteer.getLastName())
-                .append("firstName", volunteer.getFirstName())
-                .append("validated", volunteer.isValidated())
-                .append("street", volunteer.getStreet())
-                .append("postalCode", volunteer.getPostalCode())
-                .append("city", volunteer.getCity())
-                .append("country", volunteer.getCountry());
+        Document volunteerDocument = Document.parse(volunteer.toJson().toString());
         try {
             dbManager.insertOne(volunteerDocument, VOLUNTEER_COLLECTION);
         } catch (JavaBackendException e) {
@@ -79,14 +73,7 @@ public class VolunteerController {
 
     public void updateVolunteer(Volunteer volunteer){
         DatabaseManager dbManager = DatabaseManager.getInstance();
-        Document volunteerDocument = new Document("_id", volunteer.getUserId())
-                .append("lastName", volunteer.getLastName())
-                .append("firstName", volunteer.getFirstName())
-                .append("validated", volunteer.isValidated())
-                .append("street", volunteer.getStreet())
-                .append("postalCode", volunteer.getPostalCode())
-                .append("city", volunteer.getCity())
-                .append("country", volunteer.getCountry());
+        Document volunteerDocument = Document.parse(volunteer.toJson().toString());
         try {
             dbManager.updateOne(volunteerDocument, VOLUNTEER_COLLECTION);
         } catch (Exception e) {
@@ -110,5 +97,14 @@ public class VolunteerController {
     public void updateVolunteer(String lastName, String firstName, boolean validated, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
         Volunteer volunteer = new Volunteer(lastName, firstName, validated, street, postalCode, city, country, userId);
         updateVolunteer(volunteer);
+    }
+
+    public JSONArray getVolunteersAsJsonArray() {
+        List<Volunteer> volunteers = getVolunteers();
+        JSONArray jsonArray = new JSONArray();
+        for (Volunteer volunteer : volunteers) {
+            jsonArray.put(volunteer.toJson());
+        }
+        return jsonArray;
     }
 }

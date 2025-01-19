@@ -15,6 +15,7 @@ public class CommandDispatcher {
     public static class UserInfo {
         public String userID;
         public String userRole;
+        public boolean isAdmin;
     }
     public static class CommandException extends Exception {
         public CommandException(String message) {
@@ -79,27 +80,31 @@ public class CommandDispatcher {
         } catch (IllegalAccessException e) {
             throw new CommandException("Error executing command " + commandName + " : " + e.getMessage());
         } catch (InvocationTargetException e) {
+            if (e.getTargetException() instanceof JavaBackendException){
+                return new JSONObject().put("status", "error").put("message", e.getTargetException().getMessage());
+            }
             throw new CommandException("Error executing command " + commandName + " : " + e.getTargetException().getMessage());
         }
     }
 
-    public static JSONObject createVolunteerFromUser(UserInfo userInfo,String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) {
+    public static JSONObject createVolunteerFromUser(UserInfo userInfo,String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
         VolunteerController volunteerController = VolunteerController.getInstance();
-        try {
-            volunteerController.createVolunteerFromUser(lastName, firstName, validated, street, postalCode, city, country, userId);
-            return new JSONObject().put("status", "success").put("message", "Volunteer created");
-        } catch (JavaBackendException e) {
-            return new JSONObject().put("status", "error").put("message", e.getMessage());
-        }
+        volunteerController.createVolunteerFromUser(lastName, firstName, validated, street, postalCode, city, country, userId);
+        return new JSONObject().put("status", "success").put("message", "Volunteer created");
+
     }
 
-    public static JSONObject updateVolunteer(UserInfo userInfo, String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) {
-        VolunteerController volunteerController = VolunteerController.getInstance();
-        try {
-            volunteerController.updateVolunteer(lastName, firstName, validated, street, postalCode, city, country, userId);
-            return new JSONObject().put("status", "success").put("message", "Volunteer updated");
-        } catch (JavaBackendException e) {
-            return new JSONObject().put("status", "error").put("message", e.getMessage());
+    public static JSONObject updateVolunteer(UserInfo userInfo, String lastName, String firstName, Boolean validated, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
+        if(!userInfo.userID.equals(userId) && !userInfo.isAdmin){
+            return new JSONObject().put("status", "error").put("message", "You are not allowed to update this volunteer");
         }
+        VolunteerController volunteerController = VolunteerController.getInstance();
+        volunteerController.updateVolunteer(lastName, firstName, validated, street, postalCode, city, country, userId);
+        return new JSONObject().put("status", "success").put("message", "Volunteer updated");
+    }
+
+    public static JSONArray getVolunteersAsJsonArray(UserInfo userInfo) {
+        VolunteerController volunteerController = VolunteerController.getInstance();
+        return volunteerController.getVolunteersAsJsonArray();
     }
 }

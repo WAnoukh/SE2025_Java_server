@@ -14,7 +14,7 @@ public class RequestSender {
     public static void main(String[] args) throws Exception {
         App.main(args);
 
-        URL url = new URL("http://localhost:8888/test?userID=someID&userRole=Volunteer");
+        URL url = new URL("http://localhost:8888/test?userID=678c929856283f299c918cf&userRole=Volunteer&isAdmin=true");
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setRequestMethod("GET");
         //con.connect();

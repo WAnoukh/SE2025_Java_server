@@ -51,6 +51,9 @@ public class App {
           CommandDispatcher.UserInfo userInfo = new CommandDispatcher.UserInfo();
           userInfo.userID = args.get("userID");
           userInfo.userRole = args.get("userRole");
+          if(args.containsKey("isAdmin")){
+            userInfo.isAdmin = args.get("isAdmin").equals("true");
+          }
           response = CommandDispatcher.dispatch(inputLine, userInfo);
         } catch (Exception e) {
           response = new JSONObject().put("success", "false").put("message", e.getMessage());
