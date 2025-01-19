@@ -1,9 +1,7 @@
 package app.koyeb.example;
 
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -12,7 +10,6 @@ import Javabackend.CommandDispatcher;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class App {
@@ -51,8 +48,13 @@ public class App {
             builder.append(line);
           }
           inputLine = builder.toString();
-          CommandDispatcher.dispatch(inputLine);
-          response = new JSONObject().put("success", "true").put("message", "Command dispatched successfully");
+          CommandDispatcher.UserInfo userInfo = new CommandDispatcher.UserInfo();
+          userInfo.userID = args.get("userID");
+          userInfo.userRole = args.get("userRole");
+          if(args.containsKey("isAdmin")){
+            userInfo.isAdmin = args.get("isAdmin").equals("true");
+          }
+          response = CommandDispatcher.dispatch(inputLine, userInfo);
         } catch (Exception e) {
           response = new JSONObject().put("success", "false").put("message", e.getMessage());
         }

@@ -1,6 +1,7 @@
 package Javabackend.GovernmentVolunteer.Volunteer;
 
 import org.bson.Document;
+import org.json.JSONObject;
 
 public class Volunteer {
     private String lastName;
@@ -108,5 +109,19 @@ public class Volunteer {
 
     private void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("lastName", lastName);
+        json.put("firstName", firstName);
+        json.put("validated", validated);
+        json.put("street", street);
+        json.put("postalCode", postalCode);
+        json.put("city", city);
+        json.put("country", country);
+        json.put("userId", userId);
+        json.put("_id", userId);
+        return json;
     }
 }

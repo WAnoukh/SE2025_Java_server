@@ -6,6 +6,8 @@ import Javabackend.JavaBackendException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,6 @@ public class VolunteerController {
         List<Volunteer> volunteers = new ArrayList<>();
         try (MongoCursor<Document> cursor = volunteerCollection.find().iterator()) {
             while (cursor.hasNext()) {
-                //System.out.println(cursor.next().toJson());
                 try {
                     volunteers.add(new Volunteer(cursor.next()));
                 } catch (Exception e) {
@@ -62,14 +63,7 @@ public class VolunteerController {
 
     public void addVolunteer(Volunteer volunteer) throws JavaBackendException {
         DatabaseManager dbManager = DatabaseManager.getInstance();;
-        Document volunteerDocument = new Document("_id", volunteer.getUserId())
-                .append("lastName", volunteer.getLastName())
-                .append("firstName", volunteer.getFirstName())
-                .append("validated", volunteer.isValidated())
-                .append("street", volunteer.getStreet())
-                .append("postalCode", volunteer.getPostalCode())
-                .append("city", volunteer.getCity())
-                .append("country", volunteer.getCountry());
+        Document volunteerDocument = Document.parse(volunteer.toJson().toString());
         try {
             dbManager.insertOne(volunteerDocument, VOLUNTEER_COLLECTION);
         } catch (JavaBackendException e) {
@@ -79,14 +73,7 @@ public class VolunteerController {
 
     public void updateVolunteer(Volunteer volunteer){
         DatabaseManager dbManager = DatabaseManager.getInstance();
-        Document volunteerDocument = new Document("_id", volunteer.getUserId())
-                .append("lastName", volunteer.getLastName())
-                .append("firstName", volunteer.getFirstName())
-                .append("validated", volunteer.isValidated())
-                .append("street", volunteer.getStreet())
-                .append("postalCode", volunteer.getPostalCode())
-                .append("city", volunteer.getCity())
-                .append("country", volunteer.getCountry());
+        Document volunteerDocument = Document.parse(volunteer.toJson().toString());
         try {
             dbManager.updateOne(volunteerDocument, VOLUNTEER_COLLECTION);
         } catch (Exception e) {
@@ -107,52 +94,17 @@ public class VolunteerController {
         addVolunteer(volunteer);
     }
 
-    public static void main(String[] args) throws Exception {
-        Volunteer volunteer = new Volunteer(
-                "Wach", "Anouk",
-                true, "Rue de la Tour 1",
-                "1000", "Lausanne", "Switzerland",
-                "678c9729856283f299c918cf"
-                );
+    public void updateVolunteer(String lastName, String firstName, boolean validated, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
+        Volunteer volunteer = new Volunteer(lastName, firstName, validated, street, postalCode, city, country, userId);
+        updateVolunteer(volunteer);
+    }
 
-        VolunteerController vController = VolunteerController.getInstance();
-        vController.updateVolunteer(volunteer);
-
-        /*if (args.length > 0) {
-            if (args[0].equals("test")) {
-                // load test parameters
-            } else if (args[0].equals("production")) {
-                // load production parameters
-            }
-        }
-        VolunteerController vController = new VolunteerController();
-        List<Volunteer> volunteers = vController.getVolunteers();
+    public JSONArray getVolunteersAsJsonArray() {
+        List<Volunteer> volunteers = getVolunteers();
+        JSONArray jsonArray = new JSONArray();
         for (Volunteer volunteer : volunteers) {
-            System.out.println(volunteer.getLastName());
-        }*/
-
-
-        /*URL yahoo = new URL("https://hacs.bdemir.net/auth/signup");
-        URLConnection yc = yahoo.openConnection();
-        HttpURLConnection con = (HttpURLConnection)yahoo.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Accept", "application/json");
-        con.setDoOutput(true);
-        String jsonInputString = "{\"name\":\"Anoukh\" ,\"email\" : \"anoukhan.wachnicki@gmail.com\", \"password\": \"123\", \"role\":\"Volunteer\"}";
-        try(OutputStream os = con.getOutputStream()) {
-            byte[] input = jsonInputString.getBytes("utf-8");
-            os.write(input, 0, input.length);
+            jsonArray.put(volunteer.toJson());
         }
-        try(BufferedReader br = new BufferedReader(
-                new InputStreamReader(con.getInputStream(), "utf-8"))) {
-            StringBuilder response = new StringBuilder();
-            String responseLine = null;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
-            }
-            System.out.println(response.toString());
-        }
-        System.out.println(con.getResponseMessage());*/
+        return jsonArray;
     }
 }
