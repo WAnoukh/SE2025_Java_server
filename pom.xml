@@ -44,7 +44,8 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20240303</version>
-      <systemPath>${basedir}/src/main/dependencies/json-20240303.jar</systemPath>
+      <scope>system</scope>
+      <systemPath>/src/main/dependencies/json-20240303.jar</systemPath>
     </dependency>
   </dependencies>
 
