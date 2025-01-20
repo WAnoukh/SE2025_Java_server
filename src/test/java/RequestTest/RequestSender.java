@@ -12,9 +12,9 @@ import java.net.URL;
 
 public class RequestSender {
     public static void main(String[] args) throws Exception {
-        App.main(args);
+        //App.main(args);
 
-        URL url = new URL("http://localhost:8888/test?userID=678c929856283f299c918cf&userRole=Volunteer&isAdmin=true");
+        URL url = new URL("https://deaf-janela-anoukh-eb7ffe47.koyeb.app/test?userID=678c929856283f299c918cf&userRole=Volunteer&isAdmin=true");
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setRequestMethod("GET");
         //con.connect();
