@@ -107,7 +107,7 @@ public class Volunteer {
         return userId;
     }
 
-    private void setUserId(String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

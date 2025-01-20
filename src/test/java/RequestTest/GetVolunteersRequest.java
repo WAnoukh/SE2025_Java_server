@@ -1,6 +1,5 @@
 package RequestTest;
 import app.koyeb.example.App;
-import com.sun.tools.javac.Main;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -10,7 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class RequestSender {
+public class GetVolunteersRequest {
     public static void main(String[] args) throws Exception {
         App.main(args);
 
@@ -22,16 +21,7 @@ public class RequestSender {
         con.setRequestProperty("Accept", "application/json");
         con.setDoOutput(true);
         con.setDoInput(true);
-        JSONObject jsonInput = new JSONObject().put("command", "updateVolunteer")
-                .put("args", new JSONArray()
-                        .put("Wach")
-                        .put("Anouk")
-                        .put(true)
-                        .put("Rue de la Tour 1")
-                        .put("1000")
-                        .put("Lausanne")
-                        .put("Switzerland")
-                        .put("678c9729856283f299c918cf"));
+        JSONObject jsonInput = new JSONObject().put("command", "getVolunteersAsJsonArray");
         try(OutputStream os = con.getOutputStream()) {
 
             byte[] input = jsonInput.toString().getBytes("utf-8");

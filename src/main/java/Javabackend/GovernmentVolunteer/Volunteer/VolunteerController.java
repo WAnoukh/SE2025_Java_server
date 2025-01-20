@@ -47,6 +47,20 @@ public class VolunteerController {
         return volunteers;
     }
 
+    public Volunteer getVolunteerById(String userId) {
+        DatabaseManager dbManager = DatabaseManager.getInstance();
+        Document volunteerDocument = null;
+        try {
+            volunteerDocument = dbManager.getDocumentById(userId, VOLUNTEER_COLLECTION);
+        } catch (JavaBackendException e) {
+            throw new RuntimeException(VOLUNTEER_COLLECTION + " collection not found");
+        }
+        if (volunteerDocument == null) {
+            return null;
+        }
+        return new Volunteer(volunteerDocument);
+    }
+
     public List<Activity> getVolunteersActivities(Volunteer volunteer){
         //TODO: implement this method
         return null;
@@ -61,6 +75,25 @@ public class VolunteerController {
         //TODO: implement this method
     }
 
+    public boolean isVolunteerValidated(String userId) throws JavaBackendException {
+        DatabaseManager dbManager = DatabaseManager.getInstance();
+        Document volunteerDocument = dbManager.getDocumentById(userId, VOLUNTEER_COLLECTION);
+        if (volunteerDocument == null) {
+            throw new JavaBackendException("No volunteer found with this id");
+        }
+        return volunteerDocument.getBoolean("validated");
+    }
+
+    public void setVolunteerValidation(String userId, boolean validated) throws JavaBackendException {
+        DatabaseManager dbManager = DatabaseManager.getInstance();
+        Document volunteerDocument = dbManager.getDocumentById(userId, VOLUNTEER_COLLECTION);
+        if (volunteerDocument == null) {
+            throw new JavaBackendException("No volunteer found with this id");
+        }
+        volunteerDocument.put("validated", validated);
+        dbManager.updateOne(volunteerDocument, VOLUNTEER_COLLECTION);
+    }
+
     public void addVolunteer(Volunteer volunteer) throws JavaBackendException {
         DatabaseManager dbManager = DatabaseManager.getInstance();;
         Document volunteerDocument = Document.parse(volunteer.toJson().toString());
@@ -71,17 +104,23 @@ public class VolunteerController {
         }
     }
 
-    public void updateVolunteer(Volunteer volunteer){
+    public void updateVolunteer(Volunteer volunteer) throws JavaBackendException {
         DatabaseManager dbManager = DatabaseManager.getInstance();
         Document volunteerDocument = Document.parse(volunteer.toJson().toString());
+        Volunteer originalVolunteer = getVolunteerById(volunteer.getUserId());
+        if (originalVolunteer == null) {
+            throw new JavaBackendException("No volunteer found with this id, cannot update");
+        }else{
+            volunteer.setUserId(originalVolunteer.getUserId());
+        }
         try {
             dbManager.updateOne(volunteerDocument, VOLUNTEER_COLLECTION);
         } catch (Exception e) {
-            System.out.println("Error while updating volunteer: " + e.getMessage());
+            throw new JavaBackendException("Error while updating volunteer: " + e.getMessage());
         }
     }
 
-    public void createVolunteerFromUser(String lastName, String firstName, boolean validated, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
+    public void createVolunteerFromUser(String lastName, String firstName, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
         DatabaseManager dbManager = DatabaseManager.getInstance();
         try {
             if(dbManager.getDocumentById(userId, "users") == null){
@@ -90,12 +129,12 @@ public class VolunteerController {
         } catch (JavaBackendException e) {
             throw new RuntimeException(e);
         }
-        Volunteer volunteer = new Volunteer(lastName, firstName, validated, street, postalCode, city, country, userId);
+        Volunteer volunteer = new Volunteer(lastName, firstName, false, street, postalCode, city, country, userId);
         addVolunteer(volunteer);
     }
 
-    public void updateVolunteer(String lastName, String firstName, boolean validated, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
-        Volunteer volunteer = new Volunteer(lastName, firstName, validated, street, postalCode, city, country, userId);
+    public void updateVolunteer(String lastName, String firstName, String street, String postalCode, String city, String country, String userId) throws JavaBackendException {
+        Volunteer volunteer = new Volunteer(lastName, firstName, false, street, postalCode, city, country, userId);
         updateVolunteer(volunteer);
     }
 
